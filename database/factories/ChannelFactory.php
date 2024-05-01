@@ -2,14 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Models\Channel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Message>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Channel>
  */
-class MessageFactory extends Factory
+class ChannelFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -20,8 +19,10 @@ class MessageFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'channel_id' => Channel::factory(),
-            'content' => $this->faker->sentence,
+            'team_id' => function (array $attributes) {
+                return User::find($attributes['user_id'])->currentTeam->id;
+            },
+            'name' => $this->faker->slug,
         ];
     }
 }
