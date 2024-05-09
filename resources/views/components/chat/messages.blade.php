@@ -1,9 +1,11 @@
-<div x-ref="scroller" class="divide-y h-full overflow-y-scroll" x-init="() => { $refs.scroller.scroll(0, $refs.scroller.scrollHeight); }">
+<div x-ref="scroller" class="divide-y h-full overflow-y-scroll"
+     x-init="() => { $refs.scroller.scroll(0, $refs.scroller.scrollHeight); }">
     @foreach($messages as $message)
         <div class="flex space-x-4 px-4 py-2 sm:[overflow-anchor:none]">
             <div
-                class="flex-shrink-0 w-10 h-10 flex items-center justify-center text-lg font-semibold rounded-full bg-gray-200">
-                {{ str($message->user->name)->upper()->limit(2, null) }}
+                class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full">
+                <img class="h-8 w-8 rounded-full object-cover"
+                     src="{{ $message->user->profile_photo_url }}" alt="{{ $message->user->name }}"/>
             </div>
             <div>
                 <div class="flex space-x-4 items-center">

@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Channel;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Lottery;
 
 class ChannelSeeder extends Seeder
 {
@@ -59,25 +60,42 @@ class ChannelSeeder extends Seeder
             'lego-video-games',
             'lego-animation',
             'lego-community',
-            'lego-news'
+            'lego-news',
         ]);
 
-        $luca->ownedTeams->each(function ($team) use ($luca, $gamesChannelNames) {
+        $luca->ownedTeams->each(function ($team) use ($luca, $viola, $gamesChannelNames) {
             foreach ($gamesChannelNames as $channelName) {
-                $team->channels()->create([
+                $channel = $team->channels()->create([
                     'user_id' => $luca->id,
                     'name' => $channelName,
                 ]);
+
+                if ($channelName == 'dungeons-and-dragons') {
+                    $luca->channels()->attach($channel);
+                    $viola->channels()->attach($channel);
+                } else {
+                    Lottery::odds(1, 2)
+                        ->winner(fn () => $luca->channels()->attach($channel))
+                        ->choose();
+                }
             }
         });
 
         $viola->ownedTeams->each(function ($team) use ($viola, $legoChannelNames) {
             foreach ($legoChannelNames as $channelName) {
-                $team->channels()->create([
+                $channel = $team->channels()->create([
                     'user_id' => $viola->id,
                     'name' => $channelName,
                 ]);
+
+                Lottery::odds(1, 2)
+                    ->winner(fn () => $viola->channels()->attach($channel))
+                    ->choose();
             }
+        });
+
+        User::whereNotIn('id', [1, 2])->each(function ($user) {
+            $user->channels()->attach(Channel::inRandomOrder()->limit(3)->get());
         });
     }
 }

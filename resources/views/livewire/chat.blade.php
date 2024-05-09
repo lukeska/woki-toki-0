@@ -6,12 +6,39 @@
         </div>
         {{-- list of messages and message editor --}}
         <div class="w-4/5 flex flex-col">
+            <x-chat.channel-header :channel="$channel"/>
+
             <div class="flex-1 overflow-hidden">
                 <x-chat.messages :messages="$messages"/>
             </div>
+
             <div class="p-4 pt-0">
                 <x-chat.message-editor/>
             </div>
         </div>
     </div>
+
+    @teleport('body')
+    <x-dialog-modal wire:model.live="currentlyManagingSettings" :padding="false">
+        <x-slot name="title">
+            <div class="px-6 pt-4 font-semibold">
+                #{{ $channel->name }}
+            </div>
+        </x-slot>
+
+        <x-slot name="content">
+
+            <x-chat.settings :membersCount="$membersCount"
+                             :members="$members"
+                             :notMembers="$notMembers"/>
+
+        </x-slot>
+
+        <x-slot name="footer">
+            <x-secondary-button wire:click="stopManagingSettings" wire:loading.attr="disabled">
+                Close
+            </x-secondary-button>
+        </x-slot>
+    </x-dialog-modal>
+    @endteleport
 </div>

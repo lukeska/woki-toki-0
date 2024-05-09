@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -28,5 +27,12 @@ class UserSeeder extends Seeder
 
         $luca->currentTeam->users()->attach($viola, ['role' => 'admin']);
         $viola->switchTeam($luca->currentTeam);
+
+        $users = User::factory()
+            ->count(20)
+            ->withPersonalTeam()
+            ->create();
+
+        $luca->currentTeam->users()->attach($users, ['role' => 'editor']);
     }
 }
