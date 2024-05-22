@@ -1,7 +1,10 @@
 @props(['channel' => null])
 
 <div class="flex items-center justify-between p-4 border-b shadow-sm">
-    <div class="font-semibold">#{{ $channel->name }}</div>
+    <div class="font-semibold flex items-center">
+        <x-chat.channel-icon :channel="$channel"/>
+        <span>{{ $channel->name }}</span>
+    </div>
     <button wire:click="manageSettings"
             class="w-10 h-10 border hover:border-gray-300 rounded-md flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

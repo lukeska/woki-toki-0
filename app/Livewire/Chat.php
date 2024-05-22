@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Forms\ManageMembersForm;
 use App\Models\Channel;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
@@ -12,22 +13,20 @@ class Chat extends Component
 {
     public string $message = '';
 
-    public Channel $channel;
+    public ManageMembersForm $form;
 
     public bool $currentlyManagingSettings = false;
-
-    public string $searchMembers = '';
 
     public function mount(?int $id = null): void
     {
         if ($id) {
-            $this->channel = Channel::where('team_id', Auth::user()->currentTeam->id)
+            $this->form->channel = Channel::where('team_id', Auth::user()->currentTeam->id)
                 ->findOrFail($id);
 
             return;
         }
 
-        $this->channel = Auth::user()->currentTeam->channels->first();
+        $this->form->channel = Auth::user()->currentTeam->channels->first();
     }
 
     public function getListeners()
@@ -43,7 +42,7 @@ class Chat extends Component
     {
         Message::create([
             'user_id' => auth()->id(),
-            'channel_id' => $this->channel->id,
+            'channel_id' => $this->form->channel->id,
             'content' => $this->message,
         ]);
 
@@ -64,47 +63,36 @@ class Chat extends Component
     {
         $this->currentlyManagingSettings = false;
 
-        $this->reset(['searchMembers']);
+        $this->form->reset(['searchMembers']);
     }
 
     public function addMember(int $userId)
     {
-        $this->channel->users()->attach($userId);
+        $this->form->addMember($userId);
     }
 
     #[Layout('layouts.app')]
     public function render()
     {
         $messages = Message::query()
-            ->where('channel_id', $this->channel->id)
+            ->where('channel_id', $this->form->channel->id)
             ->with('user')
             ->orderBy('created_at')
             ->get();
 
-        $members = [];
-        $notMembers = [];
-
         if ($this->currentlyManagingSettings) {
-            if ($this->searchMembers) {
-                $members = $this->channel->users()
-                    ->where('name', 'like', "%{$this->searchMembers}%")
-                    ->get();
-
-                $notMembers = Auth::user()->currentTeam->users()
-                    ->whereNotIn('users.id', $members->pluck('id'))
-                    ->where('users.name', 'like', "%{$this->searchMembers}%")
-                    ->get();
-            } else {
-                $members = $this->channel->users;
-            }
+            ['members' => $members, 'notMembers' => $notMembers] = $this->form->getMembers();
+        } else {
+            $members = [];
+            $notMembers = [];
         }
 
         return view('livewire.chat')
-            ->title($this->channel->name)
+            ->title($this->form->channel->name)
             ->with([
                 'channels' => auth()->user()->channels,
                 'messages' => $messages,
-                'membersCount' => $this->channel->users()->count(),
+                'membersCount' => $this->form->channel->users()->count(),
                 'members' => $members,
                 'notMembers' => $notMembers,
             ]);

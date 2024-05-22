@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('team_id')->constrained()->cascadeOnDelete();
             $table->string('name');
+            $table->string('topic', 256)->nullable();
+            $table->boolean('private')->default(false);
             $table->timestamps();
         });
     }

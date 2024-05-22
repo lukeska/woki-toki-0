@@ -23,6 +23,8 @@ class ChannelFactory extends Factory
                 return User::find($attributes['user_id'])->currentTeam->id;
             },
             'name' => $this->faker->slug,
+            'topic' => $this->faker->sentence(10),
+            'private' => false,
         ];
     }
 }
