@@ -63,36 +63,34 @@ class ChannelSeeder extends Seeder
             'lego-news',
         ]);
 
-        $luca->ownedTeams->each(function ($team) use ($luca, $viola, $gamesChannelNames) {
-            foreach ($gamesChannelNames as $channelName) {
-                $channel = $team->channels()->create([
-                    'user_id' => $luca->id,
-                    'name' => $channelName,
-                ]);
+        foreach ($gamesChannelNames as $channelName) {
+            $channel = Channel::factory()->create([
+                'user_id' => $luca->id,
+                'name' => $channelName,
+                'private' => fake()->randomElement([true, false]),
+            ]);
 
-                if ($channelName == 'dungeons-and-dragons') {
-                    $luca->channels()->attach($channel);
-                    $viola->channels()->attach($channel);
-                } else {
-                    Lottery::odds(1, 2)
-                        ->winner(fn () => $luca->channels()->attach($channel))
-                        ->choose();
-                }
-            }
-        });
-
-        $viola->ownedTeams->each(function ($team) use ($viola, $legoChannelNames) {
-            foreach ($legoChannelNames as $channelName) {
-                $channel = $team->channels()->create([
-                    'user_id' => $viola->id,
-                    'name' => $channelName,
-                ]);
-
+            if ($channelName == 'dungeons-and-dragons') {
+                $luca->channels()->attach($channel);
+                $viola->channels()->attach($channel);
+            } else {
                 Lottery::odds(1, 2)
-                    ->winner(fn () => $viola->channels()->attach($channel))
+                    ->winner(fn () => $luca->channels()->attach($channel))
                     ->choose();
             }
-        });
+        }
+
+        foreach ($legoChannelNames as $channelName) {
+            $channel = Channel::factory()->create([
+                'user_id' => $viola->id,
+                'name' => $channelName,
+                'private' => fake()->randomElement([true, false]),
+            ]);
+
+            Lottery::odds(1, 2)
+                ->winner(fn () => $viola->channels()->attach($channel))
+                ->choose();
+        }
 
         User::whereNotIn('id', [1, 2])->each(function ($user) {
             $user->channels()->attach(Channel::inRandomOrder()->limit(3)->get());

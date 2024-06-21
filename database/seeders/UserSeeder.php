@@ -26,7 +26,6 @@ class UserSeeder extends Seeder
         ]);
 
         $luca->currentTeam->users()->attach($viola, ['role' => 'admin']);
-        $viola->switchTeam($luca->currentTeam);
 
         $users = User::factory()
             ->count(20)

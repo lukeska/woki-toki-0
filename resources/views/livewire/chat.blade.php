@@ -13,7 +13,7 @@
             </div>
 
             <div class="p-4 pt-0">
-                <x-chat.message-editor/>
+                <x-chat.message-editor :channel="$form->channel"/>
             </div>
         </div>
     </div>
@@ -29,9 +29,12 @@
 
         <x-slot name="content">
 
-            <x-chat.settings :membersCount="$membersCount"
+            <x-chat.settings :channel="$form->channel"
+                             :membersCount="$membersCount"
                              :members="$members"
-                             :notMembers="$notMembers"/>
+                             :notMembers="$notMembers"
+                             :currentSettingPage="$currentSettingPage"
+            />
 
         </x-slot>
 

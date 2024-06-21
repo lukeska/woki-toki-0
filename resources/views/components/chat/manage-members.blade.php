@@ -1,4 +1,4 @@
-@props(['members', 'notMembers'])
+@props(['channel', 'members', 'notMembers'])
 
 <div>
     <div class="px-6 py-4">
@@ -19,7 +19,7 @@
         </div>
     @endif
 
-    @if($notMembers && $notMembers->count())
+    @if(auth()->user()->belongsToChannel($channel) && $notMembers && $notMembers->count())
         <div class="py-4 bg-stone-50 border-t border-b">
             <div class="px-6 font-semibold text-sm">Not in this channel</div>
             <div class="py-4">

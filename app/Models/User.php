@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -70,5 +71,34 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Channel::class)
             ->withTimestamps();
+    }
+
+    public function currentChannels(): BelongsToMany
+    {
+        return $this->belongsToMany(Channel::class)
+            ->join('teams', 'teams.id', '=', 'channels.team_id')
+            ->where('teams.id', $this->currentTeam->id)
+            ->select('channels.*')
+            ->withTimestamps();
+    }
+
+    public function belongsToChannel(Channel $channel): bool
+    {
+        return $this->channels->contains(function ($c) use ($channel) {
+            return $c->id === $channel->id;
+        });
+    }
+
+    public function browsableChannels(): Builder
+    {
+        return Channel::query()
+            ->where('team_id', $this->currentTeam->id)
+            ->where(function ($query) {
+                $query->where('private', false)
+                    ->orWhereHas('users', function ($query) {
+                        $query->where('user_id', $this->id);
+                    });
+            })
+            ->withCount('users');
     }
 }

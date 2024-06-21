@@ -17,6 +17,11 @@ class ManageMembersForm extends Form
         $this->channel->users()->attach($userId);
     }
 
+    public function removeMember(int $userId)
+    {
+        $this->channel->users()->detach($userId);
+    }
+
     public function getMembers()
     {
         $members = [];

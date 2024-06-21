@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Chat;
+use App\Livewire\Chat\Browse;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -16,5 +17,6 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 
+    Route::get('/browse', Browse::class)->name('browse');
     Route::get('/chat/{id?}', Chat::class)->name('chat');
 });

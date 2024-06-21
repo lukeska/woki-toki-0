@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\ChannelSettings;
 use App\Livewire\Forms\ManageMembersForm;
 use App\Models\Channel;
 use App\Models\Message;
@@ -17,6 +18,8 @@ class Chat extends Component
 
     public bool $currentlyManagingSettings = false;
 
+    public ChannelSettings $currentSettingPage = ChannelSettings::About;
+
     public function mount(?int $id = null): void
     {
         if ($id) {
@@ -26,7 +29,7 @@ class Chat extends Component
             return;
         }
 
-        $this->form->channel = Auth::user()->currentTeam->channels->first();
+        $this->form->channel = Auth::user()->currentChannels()->first();
     }
 
     public function getListeners()
@@ -54,21 +57,30 @@ class Chat extends Component
         // do nothing here, this was called just ot trigger a re-render
     }
 
-    public function manageSettings()
+    public function manageSettings(?ChannelSettings $settingPage = ChannelSettings::About)
     {
         $this->currentlyManagingSettings = true;
+        $this->currentSettingPage = $settingPage;
     }
 
     public function stopManagingSettings()
     {
         $this->currentlyManagingSettings = false;
 
+        $this->reset(['currentSettingPage']);
         $this->form->reset(['searchMembers']);
     }
 
-    public function addMember(int $userId)
+    public function addMember(?int $userId = null)
     {
-        $this->form->addMember($userId);
+        $this->form->addMember($userId ?? auth()->id());
+    }
+
+    public function leaveChannel()
+    {
+        $this->form->removeMember(auth()->id());
+
+        $this->stopManagingSettings();
     }
 
     #[Layout('layouts.app')]
@@ -90,7 +102,7 @@ class Chat extends Component
         return view('livewire.chat')
             ->title($this->form->channel->name)
             ->with([
-                'channels' => auth()->user()->channels,
+                'channels' => auth()->user()->currentChannels,
                 'messages' => $messages,
                 'membersCount' => $this->form->channel->users()->count(),
                 'members' => $members,
